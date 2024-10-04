@@ -6,17 +6,10 @@ pipeline {
         maven 'maven'
     }
 
-    environment {
-        //SCANNER_HOME = tool 'sonar-scanner'
-        // DOCKERHUB_CREDENTIALS_ID = 'dockertoken'
-        // DOCKER_IMAGE_NAME = 'nikhilkhariya40/boardshack'
-        // registry = '061051256730.dkr.ecr.us-east-2.amazonaws.com/nikhilkhariya40/boardshack'
-    }
-
     stages {
         stage('Git Checkout') {
             steps {
-               git branch: 'main', credentialsId: 'git-cred', url: 'https://github.com/CloudGeniuses/Boardgame.git'
+                git branch: 'main', credentialsId: 'git-cred', url: 'https://github.com/CloudGeniuses/Boardgame.git'
             }
         }
         
@@ -57,7 +50,7 @@ pipeline {
         
         stage('Build') {
             steps {
-               sh "mvn package"
+                sh "mvn package"
             }
         }
         
@@ -82,7 +75,7 @@ pipeline {
         
         stage('Publish To Nexus') {
             steps {
-               withMaven(globalMavenSettingsConfig: 'isaac', jdk: 'jdk17', maven: 'maven', mavenSettingsConfig: '', traceability: true) {
+                withMaven(globalMavenSettingsConfig: 'isaac', jdk: 'jdk17', maven: 'maven', mavenSettingsConfig: '', traceability: true) {
                     sh "mvn deploy"
                 }
             }
@@ -118,17 +111,17 @@ pipeline {
         
         // stage('Deploy To Kubernetes') {
         //     steps {
-        //        withKubeConfig(caCertificate: '', clusterName: 'kubernetes', contextName: '', credentialsId: 'k8-cred', namespace: 'webapps', restrictKubeConfigAccess: false, serverUrl: 'https://172.31.8.146:6443') {
-        //                 sh "kubectl apply -f deployment-service.yaml"
+        //         withKubeConfig(caCertificate: '', clusterName: 'kubernetes', contextName: '', credentialsId: 'k8-cred', namespace: 'webapps', restrictKubeConfigAccess: false, serverUrl: 'https://172.31.8.146:6443') {
+        //             sh "kubectl apply -f deployment-service.yaml"
         //         }
         //     }
         // }
         
         // stage('Verify the Deployment') {
         //     steps {
-        //        withKubeConfig(caCertificate: '', clusterName: 'kubernetes', contextName: '', credentialsId: 'k8-cred', namespace: 'webapps', restrictKubeConfigAccess: false, serverUrl: 'https://172.31.8.146:6443') {
-        //                 sh "kubectl get pods -n webapps"
-        //                 sh "kubectl get svc -n webapps"
+        //         withKubeConfig(caCertificate: '', clusterName: 'kubernetes', contextName: '', credentialsId: 'k8-cred', namespace: 'webapps', restrictKubeConfigAccess: false, serverUrl: 'https://172.31.8.146:6443') {
+        //             sh "kubectl get pods -n webapps"
+        //             sh "kubectl get svc -n webapps"
         //         }
         //     }
         // }

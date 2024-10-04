@@ -7,7 +7,7 @@ pipeline {
     }
 
     environment {
-        SCANNER_HOME = tool 'sonar-scanner'
+        //SCANNER_HOME = tool 'sonar-scanner'
         // DOCKERHUB_CREDENTIALS_ID = 'dockertoken'
         // DOCKER_IMAGE_NAME = 'nikhilkhariya40/boardshack'
         // registry = '061051256730.dkr.ecr.us-east-2.amazonaws.com/nikhilkhariya40/boardshack'

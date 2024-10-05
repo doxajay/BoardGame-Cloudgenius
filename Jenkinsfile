@@ -36,7 +36,7 @@ pipeline {
             steps {
                 script {
                     // Hardcoded Docker image name and tag
-                    def dockerImageName = 'Boardgame'
+                    def dockerImageName = 'boardgame'
                     def dockerTag = 'latest'
 
                     echo "Building Docker image: ${dockerImageName}:${dockerTag}"

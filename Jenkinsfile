@@ -74,13 +74,13 @@ pipeline {
         //     }
         // }
         
-        stage('Publish To Nexus') {
-            steps {
-                withMaven(globalMavenSettingsConfig: 'isaac', jdk: 'jdk17', maven: 'maven', mavenSettingsConfig: '', traceability: true) {
-                    sh "mvn deploy"
-                }
-            }
-         }
+        //stage('Publish To Nexus') {
+        //   steps {
+        //       withMaven(globalMavenSettingsConfig: 'isaac', jdk: 'jdk17', maven: 'maven', mavenSettingsConfig: '', traceability: true) {
+        //            sh "mvn deploy"
+        //        }
+        //    }
+       //  }
         
         // stage('Build Docker Image') {
         //     steps {

@@ -51,6 +51,7 @@ pipeline {
         stage('Build') {
             steps {
                 sh 'mvn clean install'
+                archiveArtifacts artifacts: '**/target/*.jar', allowEmptyArchive: true
             }
         }
         

@@ -25,108 +25,35 @@ pipeline {
             }
         }
         
-        // stage('File System Scan') {
-        //     steps {
-        //         sh "trivy fs --format table -o trivy-fs-report.html ."
-        //     }
-        // }
-        
-        // stage('SonarQube Analysis') {
-        //     steps {
-        //         withSonarQubeEnv('sonar') {
-        //             sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=BoardGame -Dsonar.projectKey=BoardGame \
-        //                     -Dsonar.java.binaries=. '''
-        //         }
-        //     }
-        // }
-        
-        // stage('Quality Gate') {
-        //     steps {
-        //         script {
-        //           waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token' 
-        //         }
-        //     }
-        // }
-        
         stage('Build') {
             steps {
                 sh 'mvn clean install'
                 archiveArtifacts artifacts: '**/target/*.jar', allowEmptyArchive: true
             }
         }
-        
-        // Building Docker images
-        // stage('Building image') {
-        //     steps {
-        //         script {
-        //             dockerimage = docker.build registry
-        //         }
-        //     }
-        // }
-        
-        // Uploading Docker images into Docker Hub
-        // stage('Uploading to ECR') {
-        //     steps {
-        //         script {
-        //             sh 'aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 061051256730.dkr.ecr.us-east-2.amazonaws.com'
-        //             sh 'docker push 061051256730.dkr.ecr.us-east-2.amazonaws.com/nikhilkhariya40/boardshack:latest'
-        //         }
-        //     }
-        // }
-        
-        //stage('Publish To Nexus') {
-        //   steps {
-        //       withMaven(globalMavenSettingsConfig: 'isaac', jdk: 'jdk17', maven: 'maven', mavenSettingsConfig: '', traceability: true) {
-        //            sh "mvn deploy"
-        //        }
-        //    }
-       //  }
-        
-        // stage('Build Docker Image') {
-        //     steps {
-        //         script {
-        //             echo "Building Docker image: ${DOCKER_IMAGE_NAME}:${DOCKER_TAG}"
-        //             // Build the Docker image using the Dockerfile
-        //             sh 'docker build -t ${DOCKER_IMAGE_NAME}:${DOCKER_TAG} .'
-        //         }
-        //     }
-        // }
-        
-        // stage('Login to DockerHub') {
-        //     steps {
-        //         script {
-        //             echo "Logging into DockerHub..."
-        //             // Login to DockerHub using credentials from Jenkins
-        //             withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDENTIALS_ID}", usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
-        //                 sh 'docker login -u ${DOCKERHUB_USER} -p ${DOCKERHUB_PASS}'
-        //             }
-        //         }
-        //     }
-        // }
-        
-        // stage('Docker Image Scan') {
-        //     steps {
-        //         sh "trivy image --format table -o trivy-image-report.html nikhilkhariya40/boardshack:latest "
-        //     }
-        // }
-        
-        // stage('Deploy To Kubernetes') {
-        //     steps {
-        //         withKubeConfig(caCertificate: '', clusterName: 'kubernetes', contextName: '', credentialsId: 'k8-cred', namespace: 'webapps', restrictKubeConfigAccess: false, serverUrl: 'https://172.31.8.146:6443') {
-        //             sh "kubectl apply -f deployment-service.yaml"
-        //         }
-        //     }
-        // }
-        
-        // stage('Verify the Deployment') {
-        //     steps {
-        //         withKubeConfig(caCertificate: '', clusterName: 'kubernetes', contextName: '', credentialsId: 'k8-cred', namespace: 'webapps', restrictKubeConfigAccess: false, serverUrl: 'https://172.31.8.146:6443') {
-        //             sh "kubectl get pods -n webapps"
-        //             sh "kubectl get svc -n webapps"
-        //         }
-        //     }
-        // }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    // Hardcoded Docker image name and tag
+                    def dockerImageName = 'Boardgame'
+                    def dockerTag = 'latest'
+
+                    echo "Building Docker image: ${dockerImageName}:${dockerTag}"
+                    sh "docker build -t ${dockerImageName}:${dockerTag} ."
+                }
+            }
+        }
     }
+     // Uploading Docker images into ECR
+           stage('Uploading to ECR') {
+              steps {
+                 script {
+                     sh 'aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 211125403425.dkr.ecr.us-east-2.amazonaws.com'
+                     sh 'docker push 211125403425.dkr.ecr.us-east-2.amazonaws.com/Boardgame:latest'
+                 }
+             }
+         }
     
     post {
         always {

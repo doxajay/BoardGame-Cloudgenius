@@ -1,6 +1,6 @@
 pipeline {
     agent any
-    
+
     tools {
         jdk 'jdk17'
         maven 'maven'
@@ -12,19 +12,19 @@ pipeline {
                 git branch: 'main', credentialsId: 'git-cred', url: 'https://github.com/CloudGeniuses/Boardgame.git'
             }
         }
-        
+
         stage('Compile') {
             steps {
                 sh "mvn compile"
             }
         }
-        
+
         stage('Test') {
             steps {
                 sh "mvn test"
             }
         }
-        
+
         stage('Build') {
             steps {
                 sh 'mvn clean install'
@@ -44,17 +44,17 @@ pipeline {
                 }
             }
         }
+
+        stage('Uploading to ECR') {
+            steps {
+                script {
+                    sh 'aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 211125403425.dkr.ecr.us-east-2.amazonaws.com'
+                    sh 'docker push 211125403425.dkr.ecr.us-east-2.amazonaws.com/Boardgame:latest'
+                }
+            }
+        }
     }
-     // Uploading Docker images into ECR
-           stage('Uploading to ECR') {
-              steps {
-                 script {
-                     sh 'aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 211125403425.dkr.ecr.us-east-2.amazonaws.com'
-                     sh 'docker push 211125403425.dkr.ecr.us-east-2.amazonaws.com/Boardgame:latest'
-                 }
-             }
-         }
-    
+
     post {
         always {
             script {
@@ -71,7 +71,7 @@ pipeline {
                     <div style="background-color: ${bannerColor}; padding: 10px;">
                     <h3 style="color: white;">Pipeline Status: ${pipelineStatus.toUpperCase()}</h3>
                     </div>
-                    <p>Check the <a href="${BUILD_URL}">console output</a>.</p>
+                    <p>Check the <a href="${env.BUILD_URL}">console output</a>.</p>
                     </div>
                     </body>
                     </html>

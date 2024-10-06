@@ -1,0 +1,122 @@
+pipeline {
+    agent any
+
+    tools {
+        jdk 'jdk17'
+        maven 'maven'
+    }
+
+    environment {
+        AWS_REGION = credentials('aws-region')
+        EKS_CLUSTER_NAME = credentials('eks-cluster-name')
+        KUBECONFIG = "$HOME/.kube/config"
+        DOCKER_IMAGE_NAME = 'boardgame'
+        DOCKER_TAG = 'latest'
+        ECR_URL = '211125403425.dkr.ecr.us-east-2.amazonaws.com'
+        ECR_REPOSITORY = 'cloudgenius'
+    }
+
+    stages {
+        stage('Git Checkout') {
+            steps {
+                git branch: 'main', credentialsId: 'git-cred', url: 'https://github.com/CloudGeniuses/Boardgame.git'
+            }
+        }
+
+        stage('Compile and Test') {
+            steps {
+                sh './mvnw clean install'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    echo "Building Docker image: ${DOCKER_IMAGE_NAME}:${DOCKER_TAG}"
+                    sh "docker build -t ${DOCKER_IMAGE_NAME}:${DOCKER_TAG} ."
+                }
+            }
+        }
+
+        stage('Docker Login to ECR') {
+            steps {
+                script {
+                    echo "Logging into AWS ECR"
+                    sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_URL}"
+                }
+            }
+        }
+
+        stage('Upload to ECR') {
+            steps {
+                script {
+                    echo "Pushing Docker image to ECR"
+                    sh "docker tag ${DOCKER_IMAGE_NAME}:${DOCKER_TAG} ${ECR_URL}/${ECR_REPOSITORY}:${DOCKER_IMAGE_NAME}"
+                    sh "docker push ${ECR_URL}/${ECR_REPOSITORY}:${DOCKER_IMAGE_NAME}"
+                }
+            }
+        }
+
+        stage('Terraform Init') {
+            steps {
+                dir('path/to/your/terraform/files') {
+                    sh 'terraform init -backend-config="bucket=your-terraform-state-bucket" -backend-config="key=terraform.tfstate" -backend-config="region=${AWS_REGION}"'
+                }
+            }
+        }
+
+        stage('Terraform Plan') {
+            steps {
+                dir('path/to/your/terraform/files') {
+                    sh 'terraform plan -out=tfplan'
+                }
+            }
+        }
+
+        stage('Terraform Apply') {
+            steps {
+                dir('path/to/your/terraform/files') {
+                    sh 'terraform apply -auto-approve tfplan'
+                }
+            }
+        }
+
+        stage('Configure kubectl') {
+            steps {
+                script {
+                    sh "aws eks update-kubeconfig --name ${EKS_CLUSTER_NAME} --region ${AWS_REGION}"
+                }
+            }
+        }
+
+        stage('Deploy Application') {
+            steps {
+                sh 'kubectl apply -f deployment-service.yaml'
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                sh './mvnw test'
+            }
+        }
+    }
+
+    post {
+        success {
+            script {
+                echo "Deployment was successful!"
+                // Optionally send notifications
+            }
+        }
+        failure {
+            script {
+                echo "Deployment failed!"
+                // Optionally send failure notifications
+            }
+        }
+        always {
+            cleanWs()
+        }
+    }
+}

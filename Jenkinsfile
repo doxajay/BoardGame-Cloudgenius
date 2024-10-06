@@ -10,6 +10,9 @@ pipeline {
         AWS_ACCESS_KEY_ID = credentials('aws-cred') // AWS Access Key ID
         AWS_SECRET_ACCESS_KEY = credentials('aws-cred') // AWS Secret Access Key
         AWS_DEFAULT_REGION = 'us-east-2'
+        DOCKER_IMAGE_NAME = 'boardgame'
+        DOCKER_TAG = 'latest'
+        ECR_URL = '211125403425.dkr.ecr.us-east-2.amazonaws.com'
     }
 
     stages {
@@ -33,7 +36,7 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'mvn clean install'
+                sh "mvn clean install"
                 archiveArtifacts artifacts: '**/target/*.jar', allowEmptyArchive: true
             }
         }
@@ -41,22 +44,17 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    def dockerImageName = 'boardgame'
-                    def dockerTag = 'latest'
-
-                    echo "Building Docker image: ${dockerImageName}:${dockerTag}"
-                    sh "sudo docker build -t ${dockerImageName}:${dockerTag} ."
+                    echo "Building Docker image: ${DOCKER_IMAGE_NAME}:${DOCKER_TAG}"
+                    sh "docker build -t ${DOCKER_IMAGE_NAME}:${DOCKER_TAG} ."
                 }
             }
         }
 
-        stage('Docker Login') {
+        stage('Docker Login to ECR') {
             steps {
                 script {
-                    // Docker Hub login
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        sh "echo '${DOCKER_PASSWORD}' | sudo docker login --username '${DOCKER_USERNAME}' --password-stdin"
-                    }
+                    echo "Logging into AWS ECR"
+                    sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${ECR_URL}"
                 }
             }
         }
@@ -64,11 +62,9 @@ pipeline {
         stage('Uploading to ECR') {
             steps {
                 script {
-                    // Login to AWS ECR
-                    sh 'aws ecr get-login-password --region us-east-2 | sudo docker login --username AWS --password-stdin 211125403425.dkr.ecr.us-east-2.amazonaws.com'
-
-                    // Push Docker image to ECR
-                    sh 'sudo docker push 211125403425.dkr.ecr.us-east-2.amazonaws.com/Boardgame:latest'
+                    echo "Pushing Docker image to ECR"
+                    sh "docker tag ${DOCKER_IMAGE_NAME}:${DOCKER_TAG} ${ECR_URL}/${DOCKER_IMAGE_NAME}:${DOCKER_TAG}"
+                    sh "docker push ${ECR_URL}/${DOCKER_IMAGE_NAME}:${DOCKER_TAG}"
                 }
             }
         }

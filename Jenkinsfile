@@ -6,6 +6,12 @@ pipeline {
         maven 'maven'
     }
 
+    environment {
+        AWS_ACCESS_KEY_ID = credentials('aws-cred') // AWS Access Key ID
+        AWS_SECRET_ACCESS_KEY = credentials('aws-cred') // AWS Secret Access Key
+        AWS_DEFAULT_REGION = 'us-east-2'
+    }
+
     stages {
         stage('Git Checkout') {
             steps {
@@ -35,12 +41,22 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Hardcoded Docker image name and tag
-                    def dockerImageName = 'boardgame'
+                    def dockerImageName = 'Boardgame'
                     def dockerTag = 'latest'
 
                     echo "Building Docker image: ${dockerImageName}:${dockerTag}"
-                    sh "docker build -t ${dockerImageName}:${dockerTag} ."
+                    sh "sudo docker build -t ${dockerImageName}:${dockerTag} ."
+                }
+            }
+        }
+
+        stage('Docker Login') {
+            steps {
+                script {
+                    // Docker Hub login
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        sh "echo '${DOCKER_PASSWORD}' | sudo docker login --username '${DOCKER_USERNAME}' --password-stdin"
+                    }
                 }
             }
         }
@@ -48,8 +64,11 @@ pipeline {
         stage('Uploading to ECR') {
             steps {
                 script {
-                    sh 'aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 211125403425.dkr.ecr.us-east-2.amazonaws.com'
-                    sh 'docker push 211125403425.dkr.ecr.us-east-2.amazonaws.com/Boardgame:latest'
+                    // Login to AWS ECR
+                    sh 'aws ecr get-login-password --region us-east-2 | sudo docker login --username AWS --password-stdin 211125403425.dkr.ecr.us-east-2.amazonaws.com'
+
+                    // Push Docker image to ECR
+                    sh 'sudo docker push 211125403425.dkr.ecr.us-east-2.amazonaws.com/Boardgame:latest'
                 }
             }
         }

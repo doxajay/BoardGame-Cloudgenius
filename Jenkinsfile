@@ -41,7 +41,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    def dockerImageName = 'Boardgame'
+                    def dockerImageName = 'boardgame'
                     def dockerTag = 'latest'
 
                     echo "Building Docker image: ${dockerImageName}:${dockerTag}"

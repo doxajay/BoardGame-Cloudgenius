@@ -10,9 +10,10 @@ pipeline {
         AWS_ACCESS_KEY_ID = credentials('aws-cred') // AWS Access Key ID
         AWS_SECRET_ACCESS_KEY = credentials('aws-cred') // AWS Secret Access Key
         AWS_DEFAULT_REGION = 'us-east-2'
-        DOCKER_IMAGE_NAME = 'cloudgenius'
-        DOCKER_TAG = 'latest'
-        ECR_URL = '211125403425.dkr.ecr.us-east-2.amazonaws.com'
+        DOCKER_IMAGE_NAME = 'boardgame' // Set the desired image name to 'boardgame'
+        DOCKER_TAG = 'latest' // Tag for the image
+        ECR_URL = '211125403425.dkr.ecr.us-east-2.amazonaws.com' // ECR URL
+        ECR_REPOSITORY = 'cloudgenius' // Your ECR repository name
     }
 
     stages {
@@ -63,8 +64,10 @@ pipeline {
             steps {
                 script {
                     echo "Pushing Docker image to ECR"
-                    sh "docker tag ${DOCKER_IMAGE_NAME}:${DOCKER_TAG} ${ECR_URL}/${DOCKER_IMAGE_NAME}:${DOCKER_TAG}"
-                    sh "docker push ${ECR_URL}/${DOCKER_IMAGE_NAME}:${DOCKER_TAG}"
+                    // Tag the image for ECR
+                    sh "docker tag ${DOCKER_IMAGE_NAME}:${DOCKER_TAG} ${ECR_URL}/${ECR_REPOSITORY}:${DOCKER_IMAGE_NAME}"
+                    // Push the image to ECR
+                    sh "docker push ${ECR_URL}/${ECR_REPOSITORY}:${DOCKER_IMAGE_NAME}"
                 }
             }
         }

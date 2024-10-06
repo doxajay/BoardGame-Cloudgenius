@@ -10,7 +10,7 @@ pipeline {
         AWS_ACCESS_KEY_ID = credentials('aws-cred') // AWS Access Key ID
         AWS_SECRET_ACCESS_KEY = credentials('aws-cred') // AWS Secret Access Key
         AWS_DEFAULT_REGION = 'us-east-2'
-        DOCKER_IMAGE_NAME = 'boardgame'
+        DOCKER_IMAGE_NAME = 'cloudgenius'
         DOCKER_TAG = 'latest'
         ECR_URL = '211125403425.dkr.ecr.us-east-2.amazonaws.com'
     }

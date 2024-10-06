@@ -65,11 +65,25 @@ pipeline {
             }
         }
 
+        stage('Terraform Validate') {
+            steps {
+                dir('path/to/your/terraform/files') {
+                    sh 'terraform validate'
+                }
+            }
+        }
+
         stage('Terraform Plan') {
             steps {
                 dir('path/to/your/terraform/files') {
                     sh 'terraform plan -out=tfplan'
                 }
+            }
+        }
+
+        stage('Manual Approval') {
+            steps {
+                input message: 'Approve Terraform Apply?', ok: 'Yes, Apply Changes'
             }
         }
 
@@ -106,13 +120,11 @@ pipeline {
         success {
             script {
                 echo "Deployment was successful!"
-                // Optionally send notifications
             }
         }
         failure {
             script {
                 echo "Deployment failed!"
-                // Optionally send failure notifications
             }
         }
         always {

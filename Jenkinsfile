@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     tools {
-        jdk 'jdk-17'  // Ensure this matches the exact label in Jenkins Global Tool Configuration
-        maven 'maven' // Ensure Maven is also configured as 'maven' in Jenkins
+        jdk 'jdk17'
+        maven 'maven'
     }
 
     environment {
@@ -14,12 +14,14 @@ pipeline {
         DOCKER_TAG = 'latest' // Tag for the image
         ECR_URL = '211125403425.dkr.ecr.us-east-2.amazonaws.com' // ECR URL
         ECR_REPOSITORY = 'cloudgenius' // Your ECR repository name
+        // EKS_CLUSTER_NAME = '' // EKS cluster name (commented out as per your request)
+        // EKS_SERVICE_NAME = '' // EKS service name (commented out as per your request)
     }
 
     stages {
         stage('Git Checkout') {
             steps {
-                git branch: 'main', credentialsId: 'git-cred', url: 'https://github.com/CloudGeniuses/BoardGame-Cloudgenius.git'
+                git branch: 'main', credentialsId: 'git-cred', url: 'https://github.com/CloudGeniuses/Boardgame.git'
             }
         }
 
@@ -47,6 +49,19 @@ pipeline {
                 script {
                     echo "Building Docker image: ${DOCKER_IMAGE_NAME}:${DOCKER_TAG}"
                     sh "docker build -t ${DOCKER_IMAGE_NAME}:${DOCKER_TAG} ."
+                }
+            }
+        }
+
+        stage('AWS Credential Login') {
+            steps {
+                script {
+                    echo "Configuring AWS CLI with credentials"
+                    sh """
+                        aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID}
+                        aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
+                        aws configure set default.region ${AWS_DEFAULT_REGION}
+                    """
                 }
             }
         }
@@ -98,7 +113,7 @@ pipeline {
                 emailext (
                     subject: "${jobName} - Build ${buildNumber} - ${pipelineStatus.toUpperCase()}",
                     body: body,
-                    to: 'isaacobaro125@gmail.com',
+                    to: 'isaacobaro127@gmail.com',
                     from: 'jenkins@example.com',
                     replyTo: 'jenkins@example.com',
                     mimeType: 'text/html',

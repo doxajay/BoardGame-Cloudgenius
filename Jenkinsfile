@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     tools {
-        jdk 'jdk17'
-        maven 'maven'
+        jdk 'jdk-17'  // Ensure this matches the exact label in Jenkins Global Tool Configuration
+        maven 'maven' // Ensure Maven is also configured as 'maven' in Jenkins
     }
 
     environment {
@@ -65,9 +65,9 @@ pipeline {
                 script {
                     echo "Pushing Docker image to ECR"
                     // Tag the image for ECR
-                    sh "docker tag ${DOCKER_IMAGE_NAME}:${DOCKER_TAG} ${ECR_URL}/${ECR_REPOSITORY}:${DOCKER_IMAGE_NAME}"
+                    sh "docker tag ${DOCKER_IMAGE_NAME}:${DOCKER_TAG} ${ECR_URL}/${ECR_REPOSITORY}:${DOCKER_TAG}"
                     // Push the image to ECR
-                    sh "docker push ${ECR_URL}/${ECR_REPOSITORY}:${DOCKER_IMAGE_NAME}"
+                    sh "docker push ${ECR_URL}/${ECR_REPOSITORY}:${DOCKER_TAG}"
                 }
             }
         }

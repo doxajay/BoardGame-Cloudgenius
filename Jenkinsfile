@@ -12,7 +12,7 @@ pipeline {
         AWS_DEFAULT_REGION = 'us-east-2'
         DOCKER_IMAGE_NAME = 'boardgame' // Set the desired image name to 'boardgame'
         DOCKER_TAG = 'latest' // Tag for the image
-        ECR_URL = '211125403425.dkr.ecr.us-east-2.amazonaws.com' // ECR URL
+        ECR_URL = '460982569648.dkr.ecr.us-east-1.amazonaws.com/cloudgenius' // ECR URL
         ECR_REPOSITORY = 'cloudgenius' // Your ECR repository name
         // EKS_CLUSTER_NAME = '' // EKS cluster name (commented out as per your request)
         // EKS_SERVICE_NAME = '' // EKS service name (commented out as per your request)

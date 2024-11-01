@@ -9,7 +9,7 @@ pipeline {
     environment {
         AWS_ACCESS_KEY_ID = credentials('aws-cred') // AWS Access Key ID
         AWS_SECRET_ACCESS_KEY = credentials('aws-cred') // AWS Secret Access Key
-        AWS_DEFAULT_REGION = 'us-east-2'
+        AWS_DEFAULT_REGION = 'us-east-1'
         DOCKER_IMAGE_NAME = 'boardgame' // Set the desired image name to 'boardgame'
         DOCKER_TAG = 'latest' // Tag for the image
         ECR_URL = '460982569648.dkr.ecr.us-east-1.amazonaws.com/cloudgenius' // ECR URL
